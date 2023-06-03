@@ -1,19 +1,72 @@
 import { useState } from 'react';
 import { StyleSheet, View, Image, TouchableOpacity, Text } from 'react-native';
 
+let relogio = null;
+
+let ss = 0;
+let mm = 0;
+let hh = 0;
+
 export default function App() {
 
   const imagemCronometro = require('./assets/crono.png')
 
-  const [iniciar, setIniciar] = useState('Iniciar')
-  const [timer, setTimer] = useState('00:00:00')
+  const [iniciar, setIniciar] = useState('Iniciar');
+  const [timer, setTimer] = useState(0);
+  const [ultimo, setUltimo] = useState(null);
+
+
 
   function iniciarCronometro(){
-    alert('iniciando cronometro')
+    
+    // Para o relógio 
+    if(relogio !== null){
+      clearInterval(relogio);
+      relogio = null;
+
+      setIniciar('Iniciar');
+
+      // Inicia o relógio
+    }else{
+      relogio = setInterval(()=>{
+        ss++
+
+        if(ss == 60){
+          ss = 0;
+          mm++;
+        }
+        if(mm == 60){
+            mm = 0;
+            hh++;
+          }
+        
+         let horaFormatada =
+         (hh < 10 ? '0' + hh : hh) + ':' + 
+         (mm < 10 ? '0' + mm : mm) + ':' +
+         (ss < 10 ? '0' + ss : ss);
+
+         setTimer(horaFormatada);
+         setUltimo(horaFormatada);
+
+
+      },1000);
+      setIniciar('Pausar');
+    }
+
   }
   
   function pararCronometro(){
-    alert('parando cronometro')
+    if(relogio !== null){
+      clearInterval(relogio);
+      relogio = null;
+    }
+    setIniciar('Iniciar')
+    setTimer(0)
+    ss = 0;
+    mm = 0;
+    hh = 0;
+
+
   }    
   return (
     <View style={estilo.container}>
@@ -28,7 +81,7 @@ export default function App() {
         </TouchableOpacity>
 
         <TouchableOpacity style={estilo.btn} onPress={pararCronometro}>
-            <Text style={estilo.btnPausar}>Pausar</Text>  
+            <Text style={estilo.btnPausar}>Limpar</Text>  
         </TouchableOpacity>
       </View>
 
@@ -37,9 +90,9 @@ export default function App() {
 
         </Text>
       </View>
+
       <View style={estilo.areaTempoPercorrido}>
-        <Image style={estilo.relogioTempoPercorrido} source={imagemCronometro}/>
-        <Text style={estilo.tempoPercorrido}>00:00:10</Text>
+          <Text style={estilo.tempoPercorrido}>{ultimo ? 'Tempo: ' + ultimo : '' }</Text>
       </View>
 
     </View>
@@ -49,10 +102,13 @@ export default function App() {
 const estilo = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#07a2a6',
+    backgroundColor: 'black',
     alignItems: 'center',
     justifyContent: 'center',
 
+  },
+  imagem:{
+    marginTop:100,
   },
   timer:{
     marginTop:-160,
@@ -62,24 +118,25 @@ const estilo = StyleSheet.create({
   areaBotoes:{
     flexDirection:'row',
     marginTop:160,
-    height:40
+
   },
   btn:{
     margin:17,
     height:40,
     borderRadius:8,
-    backgroundColor:"#fff",
+    borderWidth:2,
+    borderColor:'#fff',
     flex:1,
     justifyContent:'center',
     alignItems:'center'
   },
   btnIniciar:{
-    color:'#07a2a6',
+    color:'#fff',
     fontSize:32,
   
   }, 
   btnPausar:{
-    color:'#07a2a6',
+    color:'#fff',
     fontSize:32
   },
   areaTempoPercorrido:{
@@ -89,10 +146,6 @@ const estilo = StyleSheet.create({
     gap:10,
     alignItems:'center',
     
-  },
-  relogioTempoPercorrido:{
-    width:32,
-    height:40
   },
 
   tempoPercorrido:{
